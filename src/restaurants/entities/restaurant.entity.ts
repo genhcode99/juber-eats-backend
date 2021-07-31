@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "@nestjs/graphql"
-import { IsBoolean, IsString, Length } from "class-validator"
+import { IsBoolean, IsOptional, IsString, Length } from "class-validator"
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
 //typedefs 와 스키마 migration 에 있는 내용이 여기로 들어왔다고 생각하라.
@@ -17,8 +17,9 @@ export class Restaurant {
   @Length(5, 10)
   name: string
 
-  @Field((type) => Boolean)
-  @Column()
+  @Field((type) => Boolean, { defaultValue: true })
+  @Column({ default: true })
+  @IsOptional()
   @IsBoolean()
   isVegan: boolean
 
@@ -26,14 +27,4 @@ export class Restaurant {
   @Column()
   @IsString()
   address: string
-
-  @Field((type) => String)
-  @Column()
-  @IsString()
-  ownerName: string
-
-  @Field((type) => String)
-  @Column()
-  @IsString()
-  categoryName: string
 }
