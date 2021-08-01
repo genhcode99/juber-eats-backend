@@ -7,14 +7,14 @@ import {
 
 export class CoreEntity {
   @PrimaryGeneratedColumn()
-  @Field(() => Number)
+  @Field((type) => Number)
   id: number
 
   @CreateDateColumn()
-  @Field(() => Date)
+  @Field((type) => Date)
   createdAt: Date
 
   @UpdateDateColumn()
-  @Field(() => Date)
+  @Field((type) => Date)
   updatedAt: Date
 }
