@@ -1,12 +1,11 @@
-import * as jwt from "jsonwebtoken"
 import { Repository } from "typeorm"
 import { Injectable } from "@nestjs/common"
 import { User } from "./entities/user.entity"
 import { LoginInput } from "./dtos/login.dto"
 import { ConfigService } from "@nestjs/config"
+import { JwtService } from "src/jwt/jwt.service"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CreateAccountInput } from "./dtos/create-account.dto"
-import { JwtService } from "src/jwt/jwt.service"
 
 @Injectable()
 export class UsersService {
@@ -56,7 +55,7 @@ export class UsersService {
           token: null,
         }
       }
-      const token = jwt.sign({ id: user.id }, this.config.get("SECRET_KEY"))
+      const token = this.jwtService.sign(user.id)
       return {
         ok: true,
         error: null,
