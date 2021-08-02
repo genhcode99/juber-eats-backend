@@ -69,4 +69,9 @@ export class UsersService {
       }
     }
   }
+
+  // Find user
+  async findById(id: number): Promise<User> {
+    return this.userDB.findOne({ id })
+  }
 }
