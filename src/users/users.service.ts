@@ -6,12 +6,14 @@ import { LoginInput } from "./dtos/login.dto"
 import { ConfigService } from "@nestjs/config"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CreateAccountInput } from "./dtos/create-account.dto"
+import { JwtService } from "src/jwt/jwt.service"
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userDB: Repository<User>,
     private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   // Create Account
