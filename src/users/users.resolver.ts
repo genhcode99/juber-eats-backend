@@ -5,6 +5,7 @@ import {
 import { User } from "./entities/user.entity"
 import { UsersService } from "./users.service"
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
+import { LoginInput, LoginOutput } from "./dtos/login.dto"
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -35,4 +36,8 @@ export class UsersResolver {
       }
     }
   }
+
+  // Login
+  @Mutation((returns) => LoginOutput)
+  async login(@Args("input") loginInput: LoginInput) {}
 }
