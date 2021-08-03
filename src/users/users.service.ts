@@ -6,6 +6,7 @@ import { ConfigService } from "@nestjs/config"
 import { JwtService } from "src/jwt/jwt.service"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CreateAccountInput } from "./dtos/create-account.dto"
+import { EditProfileInput } from "./dtos/edit-profile.dto"
 
 @Injectable()
 export class UsersService {
@@ -73,5 +74,11 @@ export class UsersService {
   // Find user
   async findById(id: number): Promise<User> {
     return this.userDB.findOne({ id })
+  }
+
+  // Edit Profile
+
+  async editProfile(userId: number, { email, password }: EditProfileInput) {
+    return this.userDB.update(userId, { email, password })
   }
 }

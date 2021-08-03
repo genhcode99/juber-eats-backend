@@ -10,6 +10,7 @@ import { AuthUser } from "src/auth/auth-user.decorator"
 import { LoginInput, LoginOutput } from "./dtos/login.dto"
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql"
 import { UserProfileInput, UserProfileOutput } from "./dtos/user-profile.dto"
+import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto"
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -72,6 +73,23 @@ export class UsersResolver {
         ok: false,
         error: "User not found",
         user: null,
+      }
+    }
+  }
+
+  // Edit Profile
+  @Mutation((returns) => EditProfileOutput)
+  @UseGuards(AuthGuard)
+  async editProfile(
+    @AuthUser() authUser: User,
+    @Args("input") editProfileInput: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      await this.usersService.editProfile(authUser.id, editProfileInput)
+    } catch (error) {
+      return {
+        ok: false,
+        error,
       }
     }
   }
