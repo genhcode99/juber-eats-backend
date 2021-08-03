@@ -12,6 +12,7 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { UsersModule } from "./users/users.module"
 import { User } from "./users/entities/user.entity"
 import { JwtMiddleware } from "./jwt/jwt.middleware"
+import { Verification } from "./users/entities/verification.entity"
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { JwtMiddleware } from "./jwt/jwt.middleware"
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== "prod",
       logging: process.env.NODE_ENV !== "prod",
-      entities: [User],
+      entities: [User, Verification],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
