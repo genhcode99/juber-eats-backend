@@ -14,11 +14,6 @@ import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql"
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Query((returns) => Boolean)
-  hi() {
-    return true
-  }
-
   // Create Account
   @Mutation((returns) => CreateAccountOutput)
   async createAccount(
