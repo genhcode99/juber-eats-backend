@@ -76,8 +76,7 @@ export class UsersService {
     return this.userDB.findOne({ id })
   }
 
-  // Edit Profile
-
+  // Edit Profile( 비밀번호 업테이트가 아닐경우에는 userDB.update 방법을 사용하는게 효율적)
   async editProfile(
     userId: number,
     { email, password }: EditProfileInput,
