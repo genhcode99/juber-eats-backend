@@ -1,10 +1,11 @@
-import { Field } from "@nestjs/graphql"
+import { Field, ObjectType } from "@nestjs/graphql"
 import {
   UpdateDateColumn,
   CreateDateColumn,
   PrimaryGeneratedColumn,
 } from "typeorm"
 
+@ObjectType()
 export class CoreEntity {
   @PrimaryGeneratedColumn()
   @Field((type) => Number)
