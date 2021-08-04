@@ -18,7 +18,9 @@ export class MailService {
     form.append("from", `Excited User <mailgun@${this.options.domain}>`)
     form.append("to", `twfilm17@gmail.com`)
     form.append("subject", subject)
-    form.append("text", content)
+    form.append("template", "1")
+    form.append("v:username", "nico")
+    form.append("v:code", "lalala")
 
     const response = await got(
       `https://api.mailgun.net/v3/${this.options.domain}/messages`,
