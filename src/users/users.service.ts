@@ -91,10 +91,23 @@ export class UsersService {
     if (email) {
       user.email = email
       user.verified = false
+      await this.verificationDB.save(this.verificationDB.create({ user }))
     }
     if (password) {
       user.password = password
     }
     return await this.userDB.save(user)
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    const verification = await this.verificationDB.findOne(
+      { code },
+      { relations: ["user"] },
+    )
+    if (verification) {
+      verification.user.verified = true
+      this.userDB.save(verification.user)
+    }
+    return false
   }
 }

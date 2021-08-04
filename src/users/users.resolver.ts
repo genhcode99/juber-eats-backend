@@ -11,6 +11,7 @@ import { LoginInput, LoginOutput } from "./dtos/login.dto"
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql"
 import { UserProfileInput, UserProfileOutput } from "./dtos/user-profile.dto"
 import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto"
+import { VerifyEmailInput, VerifyEmailOutput } from "./dtos/verify-email.dto"
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -95,6 +96,15 @@ export class UsersResolver {
         ok: false,
         error,
       }
+    }
+  }
+
+  @Mutation((returns) => VerifyEmailOutput)
+  verifyEmail(@Args("input") { code }: VerifyEmailInput) {
+    this.usersService.verifyEmail(code)
+    return {
+      ok: false,
+      error: null,
     }
   }
 }
