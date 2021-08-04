@@ -7,11 +7,14 @@ import { JwtService } from "src/jwt/jwt.service"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CreateAccountInput } from "./dtos/create-account.dto"
 import { EditProfileInput } from "./dtos/edit-profile.dto"
+import { Verification } from "./entities/verification.entity"
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userDB: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verificationDB: Repository<Verification>,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
@@ -27,8 +30,11 @@ export class UsersService {
       if (exist) {
         return { ok: false, error: "There is a user with that email already" }
       }
-      await this.userDB.save(this.userDB.create({ email, password, role }))
-      return { ok: false, error: null }
+      const user = await this.userDB.save(
+        this.userDB.create({ email, password, role }),
+      )
+      await this.verificationDB.save(this.verificationDB.create({ user }))
+      return { ok: true, error: null }
     } catch (e) {
       return { ok: false, error: "Couldn't create account." }
     }
@@ -84,6 +90,7 @@ export class UsersService {
     const user = await this.userDB.findOne(userId)
     if (email) {
       user.email = email
+      user.verified = false
     }
     if (password) {
       user.password = password
