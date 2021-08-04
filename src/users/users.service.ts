@@ -134,6 +134,7 @@ export class UsersService {
     }
   }
 
+  // Verify Email
   async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
       const verification = await this.verificationDB.findOne(
