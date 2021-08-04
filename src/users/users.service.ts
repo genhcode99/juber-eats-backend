@@ -1,13 +1,18 @@
 import { Repository } from "typeorm"
 import { Injectable } from "@nestjs/common"
 import { User } from "./entities/user.entity"
-import { LoginInput } from "./dtos/login.dto"
+import { LoginInput, LoginOutput } from "./dtos/login.dto"
 import { ConfigService } from "@nestjs/config"
 import { JwtService } from "src/jwt/jwt.service"
 import { InjectRepository } from "@nestjs/typeorm"
-import { CreateAccountInput } from "./dtos/create-account.dto"
-import { EditProfileInput } from "./dtos/edit-profile.dto"
+import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto"
 import { Verification } from "./entities/verification.entity"
+import {
+  CreateAccountInput,
+  CreateAccountOutput,
+} from "./dtos/create-account.dto"
+import { UserProfileOutput } from "./dtos/user-profile.dto"
+import { VerifyEmailOutput } from "./dtos/verify-email.dto"
 
 @Injectable()
 export class UsersService {
@@ -24,7 +29,7 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
+  }: CreateAccountInput): Promise<CreateAccountOutput> {
     try {
       const exist = await this.userDB.findOne({ email })
       if (exist) {
@@ -41,10 +46,7 @@ export class UsersService {
   }
 
   // Login
-  async login({
-    email,
-    password,
-  }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+  async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.userDB.findOne(
         { email },
@@ -81,28 +83,51 @@ export class UsersService {
   }
 
   // Find user
-  async findById(id: number): Promise<User> {
-    return this.userDB.findOne({ id })
+  async findById(id: number): Promise<UserProfileOutput> {
+    try {
+      const user = await this.userDB.findOne({ id })
+      if (user) {
+        return {
+          ok: true,
+          user,
+        }
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error: "User Not Found",
+      }
+    }
   }
 
   // Edit Profile( 비밀번호 업테이트가 아닐경우에는 userDB.update 방법을 사용하는게 효율적)
   async editProfile(
     userId: number,
     { email, password }: EditProfileInput,
-  ): Promise<User> {
-    const user = await this.userDB.findOne(userId)
-    if (email) {
-      user.email = email
-      user.verified = false
-      await this.verificationDB.save(this.verificationDB.create({ user }))
+  ): Promise<EditProfileOutput> {
+    try {
+      const user = await this.userDB.findOne(userId)
+      if (email) {
+        user.email = email
+        user.verified = false
+        await this.verificationDB.save(this.verificationDB.create({ user }))
+      }
+      if (password) {
+        user.password = password
+      }
+      await this.userDB.save(user)
+      return {
+        ok: true,
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error: "Could not update profile.",
+      }
     }
-    if (password) {
-      user.password = password
-    }
-    return await this.userDB.save(user)
   }
 
-  async verifyEmail(code: string): Promise<boolean> {
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
       const verification = await this.verificationDB.findOne(
         { code },
@@ -111,12 +136,15 @@ export class UsersService {
       if (verification) {
         verification.user.verified = true
         this.userDB.save(verification.user)
-        return true
+        return {
+          ok: true,
+        }
       }
-      throw new Error()
-    } catch (e) {
-      console.log(e)
-      return false
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      }
     }
   }
 }
