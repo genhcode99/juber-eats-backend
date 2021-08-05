@@ -120,9 +120,44 @@ describe("UsersService", () => {
       )
       expect(result).toEqual({ ok: true, error: null })
     })
+
+    // 3. 예외적인 문제가 발생했을 경우
+    it("should fail on exception", async () => {
+      usersRepository.findOne.mockRejectedValue(new Error())
+
+      const result = await service.createAccount(createAccountArgs)
+
+      expect(result).toEqual({ ok: false, error: "Couldn't create account." })
+    })
   })
 
-  it.todo("login")
+  // Create Account
+  describe("login", () => {
+    const logInArgs = {
+      email: "bs@email.com",
+      password: "bs.password",
+    }
+
+    // 1.유저가 존재하지 않을 경우
+    it("should fail if user does not exist", async () => {
+      usersRepository.findOne.mockResolvedValue(null)
+
+      const result = await service.login(logInArgs)
+
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1)
+      expect(usersRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+      )
+
+      expect(result).toEqual({
+        ok: false,
+        error: "User not found",
+        token: null,
+      })
+    })
+  })
+
   it.todo("findById")
   it.todo("editProfile")
   it.todo("verifyEmail")
