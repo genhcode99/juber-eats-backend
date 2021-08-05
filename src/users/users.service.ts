@@ -94,7 +94,7 @@ export class UsersService {
         ok: true,
         user,
       }
-    } catch (error) {
+    } catch (e) {
       return {
         ok: false,
         error: "User Not Found",
