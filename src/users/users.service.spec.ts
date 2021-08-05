@@ -58,11 +58,28 @@ describe("UsersService", () => {
     expect(service).toBeDefined()
   })
 
+  // Create Account
   describe("createAccount", () => {
-    it("should fail if user exist", () => {})
+    // 1.이미 아이디가 존재할때
+    it("should fail if user exist", async () => {
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: "lalalala",
+      })
+
+      const result = await service.createAccount({
+        email: "",
+        password: "",
+        role: 0,
+      })
+
+      expect(result).toMatchObject({
+        ok: false,
+        error: "There is a user with that email already",
+      })
+    })
   })
 
-  it("createAccount")
   it.todo("login")
   it.todo("findById")
   it.todo("editProfile")
