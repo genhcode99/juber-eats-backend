@@ -7,11 +7,11 @@ import { User } from "./entities/user.entity"
 import { Verification } from "./entities/verification.entity"
 import { UsersService } from "./users.service"
 
-const mockRepository = {
+const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
-}
+})
 
 const mockJwtService = {
   sign: jest.fn(),
@@ -34,11 +34,11 @@ describe("UsersService", () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: getRepositoryToken(Verification),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: JwtService,
@@ -60,23 +60,38 @@ describe("UsersService", () => {
 
   // Create Account
   describe("createAccount", () => {
-    // 1.이미 아이디가 존재할때
+    const createAccountArgs = {
+      email: "",
+      password: "",
+      role: 0,
+    }
+
+    // 1.이미 아이디가 존재할 경우
     it("should fail if user exist", async () => {
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: "lalalala",
       })
 
-      const result = await service.createAccount({
-        email: "",
-        password: "",
-        role: 0,
-      })
+      const result = await service.createAccount(createAccountArgs)
 
       expect(result).toMatchObject({
         ok: false,
         error: "There is a user with that email already",
       })
+    })
+
+    // 2.아이디가 정상적으로 생성되었을 경우
+    it("should create a new user", async () => {
+      usersRepository.findOne.mockResolvedValue(undefined)
+      usersRepository.create.mockReturnValue(createAccountArgs)
+
+      await service.createAccount(createAccountArgs)
+
+      expect(usersRepository.create).toHaveBeenCalledTimes(1)
+      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs)
+      expect(usersRepository.save).toHaveBeenCalledTimes(1)
+      expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs)
     })
   })
 
