@@ -14,7 +14,7 @@ const mockRepository = () => ({
 })
 
 const mockJwtService = {
-  sign: jest.fn(),
+  sign: jest.fn(() => "signed-token-baby"),
   verify: jest.fn(),
 }
 
@@ -29,8 +29,9 @@ describe("UsersService", () => {
   let usersRepository: MockRepository<User>
   let verificationsRepository: MockRepository<Verification>
   let mailService: MailService
+  let jwtService: JwtService
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         UsersService,
@@ -52,6 +53,7 @@ describe("UsersService", () => {
         },
       ],
     }).compile()
+    jwtService = module.get<JwtService>(JwtService)
     service = module.get<UsersService>(UsersService)
     mailService = module.get<MailService>(MailService)
     usersRepository = module.get(getRepositoryToken(User))
@@ -154,6 +156,45 @@ describe("UsersService", () => {
         ok: false,
         error: "User not found",
         token: null,
+      })
+    })
+
+    // 2.비밀번호가 틀렸을 경우
+    it("should fail if the password is wrong", async () => {
+      const mockedUser = {
+        id: 1,
+        checkPassword: jest.fn(() => Promise.resolve(false)),
+      }
+
+      usersRepository.findOne.mockResolvedValue(mockedUser)
+
+      const result = await service.login(logInArgs)
+
+      expect(result).toEqual({
+        ok: false,
+        error: "Wrong password",
+        token: null,
+      })
+    })
+
+    // 3.로그인에 성공할 경우
+    it("should return token if password correct", async () => {
+      const mockedUser = {
+        id: 1,
+        checkPassword: jest.fn(() => Promise.resolve(true)),
+      }
+
+      usersRepository.findOne.mockResolvedValue(mockedUser)
+
+      const result = await service.login(logInArgs)
+
+      expect(jwtService.sign).toHaveBeenCalledTimes(1)
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Number))
+
+      expect(result).toEqual({
+        ok: true,
+        error: null,
+        token: "signed-token-baby",
       })
     })
   })
