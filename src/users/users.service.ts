@@ -77,10 +77,10 @@ export class UsersService {
         error: null,
         token,
       }
-    } catch (error) {
+    } catch (e) {
       return {
         ok: false,
-        error,
+        error: "Can't log user in.",
         token: null,
       }
     }
@@ -89,12 +89,10 @@ export class UsersService {
   // Find user
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.userDB.findOne({ id })
-      if (user) {
-        return {
-          ok: true,
-          user,
-        }
+      const user = await this.userDB.findOneOrFail({ id })
+      return {
+        ok: true,
+        user,
       }
     } catch (error) {
       return {

@@ -11,6 +11,7 @@ const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
+  findOneOrFail: jest.fn(),
 })
 
 const mockJwtService = {
@@ -133,7 +134,7 @@ describe("UsersService", () => {
     })
   })
 
-  // Create Account
+  // Login
   describe("login", () => {
     const logInArgs = {
       email: "bs@email.com",
@@ -197,9 +198,49 @@ describe("UsersService", () => {
         token: "signed-token-baby",
       })
     })
+
+    // 4. 예외적인 문제가 발생한 경우
+    it("should fail on exception", async () => {
+      usersRepository.findOne.mockRejectedValue(new Error())
+      const result = await service.login(logInArgs)
+      expect(result).toEqual({
+        ok: false,
+        error: "Can't log user in.",
+        token: null,
+      })
+    })
   })
 
-  it.todo("findById")
-  it.todo("editProfile")
+  // Find User
+  describe("findById", () => {
+    const findByIdArgs = {
+      id: 1,
+    }
+
+    // 1. 유저를 찾았을 경우
+    it("should find an existing user", async () => {
+      usersRepository.findOneOrFail.mockResolvedValue(findByIdArgs)
+      const result = await service.findById(1)
+      expect(result).toEqual({
+        ok: true,
+        user: findByIdArgs,
+      })
+    })
+
+    // 2. 유저를 찾지 못했을 경우
+    it("should fail if no user is found", async () => {
+      usersRepository.findOneOrFail.mockRejectedValue(new Error())
+      const result = await service.findById(1)
+      expect(result).toEqual({
+        ok: false,
+        error: "User Not Found",
+      })
+    })
+
+    // 2. 유저를 찾을 수 없는 경우
+  })
+
+  // Edit Profile
+  describe("editProfile", () => {})
   it.todo("verifyEmail")
 })
