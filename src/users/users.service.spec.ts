@@ -14,14 +14,14 @@ const mockRepository = () => ({
   findOneOrFail: jest.fn(),
 })
 
-const mockJwtService = {
+const mockJwtService = () => ({
   sign: jest.fn(() => "signed-token-baby"),
   verify: jest.fn(),
-}
+})
 
-const mockMailService = {
+const mockMailService = () => ({
   sendVerificationEmail: jest.fn(),
-}
+})
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>
 
@@ -46,11 +46,11 @@ describe("UsersService", () => {
         },
         {
           provide: JwtService,
-          useValue: mockJwtService,
+          useValue: mockJwtService(),
         },
         {
           provide: MailService,
-          useValue: mockMailService,
+          useValue: mockMailService(),
         },
       ],
     }).compile()
@@ -236,12 +236,11 @@ describe("UsersService", () => {
         error: "User Not Found",
       })
     })
-
-    // 2. 유저를 찾을 수 없는 경우
   })
 
   // Edit Profile
   describe("editProfile", () => {
+    // 1.이메일을 변경할 경우
     it("should change email", async () => {
       const oldUser = {
         email: "bs@old.com",
@@ -275,10 +274,50 @@ describe("UsersService", () => {
       })
       expect(verificationsRepository.save).toHaveBeenCalledWith(newVerification)
 
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1)
       expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
         newUser.email,
         newVerification.code,
       )
+    })
+
+    // 2. 비밀번호를 변경할 경우
+    it("should change password", async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { password: "new.password" },
+      }
+
+      usersRepository.findOne.mockResolvedValue({ password: "old-pass-word" })
+
+      const result = await service.editProfile(
+        editProfileArgs.userId,
+        editProfileArgs.input,
+      )
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1)
+      expect(usersRepository.save).toHaveBeenCalledWith(editProfileArgs.input)
+      expect(result).toEqual({ ok: true })
+    })
+
+    // 3.예외적인 문제가 발생할 경우
+    it("should fail on exception", async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { email: "bs@new.com" },
+      }
+
+      usersRepository.findOne.mockRejectedValue(new Error())
+
+      const result = await service.editProfile(
+        editProfileArgs.userId,
+        editProfileArgs.input,
+      )
+
+      expect(result).toEqual({
+        ok: false,
+        error: "Could not update profile.",
+      })
     })
   })
 
