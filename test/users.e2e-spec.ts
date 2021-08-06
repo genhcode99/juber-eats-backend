@@ -1,4 +1,5 @@
 import * as request from "supertest"
+import { getConnection } from "typeorm"
 import { AppModule } from "../src/app.module"
 import { INestApplication } from "@nestjs/common"
 import { Test, TestingModule } from "@nestjs/testing"
@@ -14,6 +15,12 @@ describe("UserModule (e2e)", () => {
     app = module.createNestApplication()
     await app.init()
   })
+
+  afterAll(async () => {
+    await getConnection().dropDatabase()
+    app.close()
+  })
+
   it.todo("me")
   it.todo("userProfile")
   it.todo("createAccount")
