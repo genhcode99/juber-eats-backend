@@ -14,6 +14,7 @@ const GRAPHQL_ENDPOINT = "/graphql"
 
 describe("UserModule (e2e)", () => {
   let app: INestApplication
+  let jwtToken: string
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,10 +30,13 @@ describe("UserModule (e2e)", () => {
     app.close()
   })
 
+  const testUser = {
+    email: "nico@las.com",
+    password: "test.password",
+  }
+
   // Describe
   describe("createAccount", () => {
-    const EMAIL = "nico@las.com"
-
     // 1. 유저 계정이 만들어졌을 경우
     it("should create account", () => {
       return request(app.getHttpServer())
@@ -42,8 +46,8 @@ describe("UserModule (e2e)", () => {
           mutation{
             createAccount(
               input:{
-                email:"${EMAIL}",
-                password:"test.password",
+                email:"${testUser.email}",
+                password:"${testUser.password}",
                 role:Client
               }){
               ok
@@ -68,8 +72,8 @@ describe("UserModule (e2e)", () => {
           mutation{
             createAccount(
               input:{
-                email:"${EMAIL}",
-                password:"test.password",
+                email:"${testUser.email}",
+                password:"${testUser.password}",
                 role:Client
               }){
               ok
@@ -87,8 +91,78 @@ describe("UserModule (e2e)", () => {
         })
     })
   })
+
+  // Login
+  describe("login", () => {
+    // 1. 로그인 되었을 경우
+    it("should login with correct credentials", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation{
+              login(
+                input:{
+                  email:"${testUser.email}",
+                  password:"${testUser.password}"
+                }
+              )
+              {
+                ok
+                error
+                token
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { login },
+            },
+          } = res
+          expect(login.ok).toBeTruthy()
+          expect(login.error).toBe(null)
+          expect(login.token).toEqual(expect.any(String))
+          jwtToken = login.token
+        })
+    })
+
+    it("should not be abled to login with wrong credentials", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation{
+              login(
+                input:{
+                  email:"${testUser.email}",
+                  password:"WrongPassword"
+                }
+              )
+              {
+                ok
+                error
+                token
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: { login },
+            },
+          } = res
+          expect(login.ok).toBeFalsy()
+          expect(login.error).toBe("Wrong password")
+          expect(login.token).toBe(null)
+        })
+    })
+  })
   it.todo("userProfile")
-  it.todo("login")
   it.todo("me")
   it.todo("verifyEmail")
   it.todo("editProfile")
