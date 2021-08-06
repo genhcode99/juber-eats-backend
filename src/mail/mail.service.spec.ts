@@ -33,6 +33,25 @@ describe("MailService", () => {
     expect(service).toBeDefined()
   })
 
-  it.todo("sendEmail")
-  it.todo("sendVerificationEmail")
+  describe("sendVerificationEmail", () => {
+    it("should call sendEmail", () => {
+      const sendVerificationEmailArgs = {
+        email: "bs@email.com",
+        code: "code",
+      }
+
+      jest.spyOn(service, "sendEmail").mockImplementation(async () => {})
+
+      service.sendVerificationEmail(
+        sendVerificationEmailArgs.email,
+        sendVerificationEmailArgs.code,
+      )
+
+      expect(service.sendEmail).toHaveBeenCalledTimes(1)
+      expect(service.sendEmail).toHaveBeenCalledWith("Verify your Email", "1", [
+        { key: "code", value: sendVerificationEmailArgs.code },
+        { key: "username", value: sendVerificationEmailArgs.email },
+      ])
+    })
+  })
 })

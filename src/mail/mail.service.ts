@@ -11,11 +11,7 @@ export class MailService {
   ) {}
 
   // Send Email
-  private async sendEmail(
-    subject: string,
-    template: string,
-    emailVar: EmailVar[],
-  ) {
+  async sendEmail(subject: string, template: string, emailVar: EmailVar[]) {
     const form = new FormData()
     form.append(
       "from",
