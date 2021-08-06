@@ -141,16 +141,15 @@ export class UsersService {
       )
       if (verification) {
         verification.user.verified = true
-        this.userDB.save(verification.user)
+        await this.userDB.save(verification.user)
+        await this.verificationDB.delete(verification.id)
         return {
           ok: true,
         }
       }
+      return { ok: false, error: "Verification not found." }
     } catch (error) {
-      return {
-        ok: false,
-        error,
-      }
+      return { ok: false, error: "Could not verify email." }
     }
   }
 }
