@@ -1,13 +1,13 @@
+import got from "got"
+import * as FormData from "form-data"
 import { Test } from "@nestjs/testing"
-import { CONFIG_OPTIONS } from "src/common/common.constants"
 import { MailService } from "./mail.service"
+import { CONFIG_OPTIONS } from "src/common/common.constants"
 
-jest.mock("got", () => {})
-jest.mock("form-data", () => {
-  return {
-    append: jest.fn(),
-  }
-})
+jest.mock("got")
+jest.mock("form-data")
+
+const TEST_DOMAIN = "test-domain"
 
 describe("MailService", () => {
   let service: MailService
@@ -20,7 +20,7 @@ describe("MailService", () => {
           provide: CONFIG_OPTIONS,
           useValue: {
             apiKey: "test-apiKey",
-            domain: "test-domain",
+            domain: TEST_DOMAIN,
             fromEmail: "test-fromEmail",
           },
         },
@@ -40,7 +40,7 @@ describe("MailService", () => {
         code: "code",
       }
 
-      jest.spyOn(service, "sendEmail").mockImplementation(async () => {})
+      jest.spyOn(service, "sendEmail").mockImplementation(async () => true)
 
       service.sendVerificationEmail(
         sendVerificationEmailArgs.email,
@@ -52,6 +52,29 @@ describe("MailService", () => {
         { key: "code", value: sendVerificationEmailArgs.code },
         { key: "username", value: sendVerificationEmailArgs.email },
       ])
+    })
+  })
+
+  describe("sendEmail", () => {
+    it("send email", async () => {
+      const ok = await service.sendEmail("", "", [])
+      const formSpy = jest.spyOn(FormData.prototype, "append")
+      expect(formSpy).toHaveBeenCalled()
+      expect(got.post).toHaveBeenCalledTimes(1)
+      expect(got.post).toHaveBeenCalledWith(
+        `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
+        expect.any(Object),
+      )
+      expect(ok).toEqual(true)
+    })
+
+    it("fails on error", async () => {
+      jest.spyOn(got, "post").mockImplementation(() => {
+        throw new Error()
+      })
+      const ok = await service.sendEmail("", "", [])
+
+      expect(ok).toEqual(false)
     })
   })
 })
