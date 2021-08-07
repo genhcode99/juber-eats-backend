@@ -248,7 +248,58 @@ describe("UserModule (e2e)", () => {
     })
   })
 
-  it.todo("me")
+  // Me
+  describe("me", () => {
+    // 1. 로그인 되어있는 상태에서 유저를 볼 경우
+    it("should find my profile", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            query{
+              me{
+                email
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res
+          expect(email).toBe(testUser.email)
+        })
+    })
+
+    // 2. 로그인 되어있지 않은 상태에서 유저를 볼 경우
+    it("should not allow logged out user", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            query{
+              me{
+                email
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: { errors },
+          } = res
+          const [error] = errors
+          expect(error.message).toBe("Forbidden resource")
+        })
+    })
+  })
   it.todo("verifyEmail")
   it.todo("editProfile")
 })
