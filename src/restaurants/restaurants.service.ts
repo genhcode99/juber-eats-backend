@@ -2,28 +2,34 @@ import { Repository } from "typeorm"
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Restaurant } from "./entities/restaurant.entity"
-import { CreateRestaurantDto } from "./dtos/create-restaurant.dto"
-import { UpdateRestaurantDto } from "./dtos/update-restaurant.dto"
+import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
+import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
+import { User } from "src/users/entities/user.entity"
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
-    private readonly restaurants: Repository<Restaurant>,
+    private readonly restaurantsDB: Repository<Restaurant>,
   ) {}
 
-  getAll(): Promise<Restaurant[]> {
-    return this.restaurants.find()
-  }
-
-  createRestaurant(
-    createRestaurantDto: CreateRestaurantDto,
-  ): Promise<Restaurant> {
-    const newRestaurant = this.restaurants.create(createRestaurantDto)
-    return this.restaurants.save(newRestaurant)
-  }
-
-  updateRestaurant({ id, data }: UpdateRestaurantDto) {
-    this.restaurants.update(id, { ...data })
+  // Create Restaurant
+  async createRestaurant(
+    owner: User,
+    createRestaurantInput: CreateRestaurantInput,
+  ): Promise<CreateAccountOutput> {
+    try {
+      const newRestaurant = this.restaurantsDB.create(CreateRestaurantInput)
+      await this.restaurantsDB.save(newRestaurant)
+      return {
+        ok: true,
+        error: null,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could not create restaurant",
+      }
+    }
   }
 }
