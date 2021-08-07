@@ -13,9 +13,10 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { UsersModule } from "./users/users.module"
 import { User } from "./users/entities/user.entity"
 import { JwtMiddleware } from "./jwt/jwt.middleware"
-import { Verification } from "./users/entities/verification.entity"
-import { Restaurant } from "./restaurants/entities/restaurant.entity"
 import { Category } from "./restaurants/entities/cetegory.entity"
+import { Verification } from "./users/entities/verification.entity"
+import { RestaurantsModule } from "./restaurants/restaurants.module"
+import { Restaurant } from "./restaurants/entities/restaurant.entity"
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { Category } from "./restaurants/entities/cetegory.entity"
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
     UsersModule,
+    RestaurantsModule,
   ],
   controllers: [],
   providers: [],

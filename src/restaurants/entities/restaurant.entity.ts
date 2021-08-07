@@ -1,11 +1,12 @@
 import { Column, Entity, ManyToOne } from "typeorm"
 import { IsString, Length } from "class-validator"
-import { Field, ObjectType } from "@nestjs/graphql"
+import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { CoreEntity } from "src/common/entities/core.entity"
 import { Category } from "./cetegory.entity"
+import { User } from "src/users/entities/user.entity"
 
 //typedefs 와 스키마 migration 에 있는 내용이 여기로 들어왔다고 생각하라.
-
+@InputType("RestaurantInputType", { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Restaurant extends CoreEntity {
@@ -29,7 +30,15 @@ export class Restaurant extends CoreEntity {
   address: string
 
   //Category
-  @Field((type) => Category)
-  @ManyToOne((type) => Category, (category) => category.restaurants)
+  @Field((type) => Category, { nullable: true })
+  @ManyToOne((type) => Category, (category) => category.restaurants, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   category: Category
+
+  //Owner
+  @Field((type) => User)
+  @ManyToOne((type) => User, (user) => user.restaurants)
+  owner: User
 }
