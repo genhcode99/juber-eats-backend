@@ -5,6 +5,8 @@ import { INestApplication } from "@nestjs/common"
 import { Test, TestingModule } from "@nestjs/testing"
 import { User } from "src/users/entities/user.entity"
 import { getRepositoryToken } from "@nestjs/typeorm"
+import { Verification } from "src/users/entities/verification.entity"
+import { isRef } from "joi"
 
 jest.mock("got", () => {
   return {
@@ -17,6 +19,7 @@ const GRAPHQL_ENDPOINT = "/graphql"
 describe("UserModule (e2e)", () => {
   let app: INestApplication
   let userRepository: Repository<User>
+  let verificationRepository: Repository<Verification>
   let jwtToken: string
 
   beforeAll(async () => {
@@ -26,6 +29,9 @@ describe("UserModule (e2e)", () => {
 
     app = module.createNestApplication()
     userRepository = module.get<Repository<User>>(getRepositoryToken(User))
+    verificationRepository = module.get<Repository<Verification>>(
+      getRepositoryToken(Verification),
+    )
     await app.init()
   })
 
@@ -360,5 +366,75 @@ describe("UserModule (e2e)", () => {
     })
   })
 
-  it.todo("verifyEmail")
+  // Verify Email
+  describe("verifyEmail", () => {
+    let verificationCode: string
+
+    beforeAll(async () => {
+      const [verification] = await verificationRepository.find()
+      verificationCode = verification.code
+    })
+
+    // 1. 코드가 맞을 경우
+    it("should verify email", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation{
+              verifyEmail(
+                input:{
+                  code:"${verificationCode}"
+                }){
+                ok
+                error
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res
+          expect(ok).toBeTruthy()
+          expect(error).toBe(null)
+        })
+    })
+
+    // 2. 코드가 틀렸을 경우
+    it("should fail on verification code not found", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+            mutation{
+              verifyEmail(
+                input:{
+                  code:"WrongCode"
+                }){
+                ok
+                error
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res
+          expect(ok).toBeFalsy()
+          expect(error).toBe("Verification not found.")
+        })
+    })
+  })
 })
