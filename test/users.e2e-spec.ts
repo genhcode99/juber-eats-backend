@@ -1,8 +1,10 @@
 import * as request from "supertest"
-import { getConnection } from "typeorm"
+import { getConnection, Repository } from "typeorm"
 import { AppModule } from "../src/app.module"
 import { INestApplication } from "@nestjs/common"
 import { Test, TestingModule } from "@nestjs/testing"
+import { User } from "src/users/entities/user.entity"
+import { getRepositoryToken } from "@nestjs/typeorm"
 
 jest.mock("got", () => {
   return {
@@ -14,6 +16,7 @@ const GRAPHQL_ENDPOINT = "/graphql"
 
 describe("UserModule (e2e)", () => {
   let app: INestApplication
+  let userRepository: Repository<User>
   let jwtToken: string
 
   beforeAll(async () => {
@@ -22,6 +25,7 @@ describe("UserModule (e2e)", () => {
     }).compile()
 
     app = module.createNestApplication()
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User))
     await app.init()
   })
 
@@ -129,6 +133,7 @@ describe("UserModule (e2e)", () => {
         })
     })
 
+    // 2. 비밀번호가 틀렸을 경우
     it("should not be abled to login with wrong credentials", () => {
       return request(app.getHttpServer())
         .post(GRAPHQL_ENDPOINT)
@@ -162,7 +167,87 @@ describe("UserModule (e2e)", () => {
         })
     })
   })
-  it.todo("userProfile")
+
+  // User Profile
+  describe("userProfile", () => {
+    let userId: number
+
+    beforeAll(async () => {
+      const [user] = await userRepository.find()
+      userId = user.id
+    })
+
+    // 1. 유저를 찾았을 경우
+    it("should see a user's profile", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            query{
+              userProfile(userId:${userId}){
+                ok
+                error
+                user{
+                  id
+                }
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                userProfile: {
+                  ok,
+                  error,
+                  user: { id },
+                },
+              },
+            },
+          } = res
+          expect(ok).toBeTruthy()
+          expect(error).toBe(null)
+          expect(id).toBe(userId)
+        })
+    })
+
+    // 2. 유저를 찾지 못했을 경우
+    it("should not find a profile", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            query{
+              userProfile(userId:9999){
+                ok
+                error
+                user{
+                  id
+                }
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                userProfile: { ok, error, user },
+              },
+            },
+          } = res
+          expect(ok).toBeFalsy()
+          expect(error).toBe("User Not Found")
+          expect(user).toBe(null)
+        })
+    })
+  })
+
   it.todo("me")
   it.todo("verifyEmail")
   it.todo("editProfile")
