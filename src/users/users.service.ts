@@ -112,6 +112,7 @@ export class UsersService {
       if (email) {
         user.email = email
         user.verified = false
+        await this.verificationDB.delete({ user: { id: user.id } })
         const verification = await this.verificationDB.save(
           this.verificationDB.create({ user }),
         )

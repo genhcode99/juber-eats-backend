@@ -300,6 +300,65 @@ describe("UserModule (e2e)", () => {
         })
     })
   })
+
+  // Edit Profile
+  describe("editProfile", () => {
+    // 1. 이메일 변경
+    it("should change email", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            mutation{
+              editProfile(input:{email:"new@email.com"}){
+                ok
+                error
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res
+          expect(ok).toBeTruthy()
+          expect(error).toBe(null)
+        })
+    })
+
+    // 2. 이메일이 변경 되었는지 확인
+    it("should have new email", () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+      query{
+        me{
+          email
+        }
+      }
+    `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res
+          expect(email).toBe("new@email.com")
+        })
+    })
+  })
+
   it.todo("verifyEmail")
-  it.todo("editProfile")
 })
