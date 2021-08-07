@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt"
-import { IsEmail, IsEnum, IsString } from "class-validator"
+import { IsBoolean, IsEmail, IsEnum, IsString } from "class-validator"
 import { CoreEntity } from "src/common/entities/core.entity"
 import { InternalServerErrorException } from "@nestjs/common"
 import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm"
@@ -34,6 +34,7 @@ export class User extends CoreEntity {
 
   @Column({ default: false })
   @Field((type) => Boolean)
+  @IsBoolean()
   verified: boolean
 
   @BeforeInsert()

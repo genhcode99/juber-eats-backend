@@ -1,14 +1,14 @@
-import { Column, Entity, ManyToOne } from "typeorm"
+import { Restaurant } from "./restaurant.entity"
 import { IsString, Length } from "class-validator"
 import { Field, ObjectType } from "@nestjs/graphql"
+import { Column, Entity, OneToMany } from "typeorm"
 import { CoreEntity } from "src/common/entities/core.entity"
-import { Category } from "./cetegory.entity"
 
 //typedefs 와 스키마 migration 에 있는 내용이 여기로 들어왔다고 생각하라.
 
 @ObjectType()
 @Entity()
-export class Restaurant extends CoreEntity {
+export class Category extends CoreEntity {
   // Name
   @Field((type) => String)
   @Column()
@@ -22,14 +22,8 @@ export class Restaurant extends CoreEntity {
   @IsString()
   coverImg: string
 
-  // Address
-  @Field((type) => String)
-  @Column()
-  @IsString()
-  address: string
-
-  //Category
-  @Field((type) => Category)
-  @ManyToOne((type) => Category, (category) => category.restaurants)
-  category: Category
+  // Restaurants
+  @Field((type) => [Restaurant])
+  @OneToMany((type) => Restaurant, (restaurant) => restaurant.category)
+  restaurants: Restaurant[]
 }

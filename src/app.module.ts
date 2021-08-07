@@ -7,13 +7,15 @@ import {
 import * as Joi from "joi"
 import { JwtModule } from "./jwt/jwt.module"
 import { ConfigModule } from "@nestjs/config"
+import { MailModule } from "./mail/mail.module"
 import { GraphQLModule } from "@nestjs/graphql"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { UsersModule } from "./users/users.module"
 import { User } from "./users/entities/user.entity"
 import { JwtMiddleware } from "./jwt/jwt.middleware"
 import { Verification } from "./users/entities/verification.entity"
-import { MailModule } from "./mail/mail.module"
+import { Restaurant } from "./restaurants/entities/restaurant.entity"
+import { Category } from "./restaurants/entities/cetegory.entity"
 
 @Module({
   imports: [
@@ -45,7 +47,7 @@ import { MailModule } from "./mail/mail.module"
       synchronize: process.env.NODE_ENV !== "prod",
       logging:
         process.env.NODE_ENV !== "prod" && process.env.NODE_ENV !== "test",
-      entities: [User, Verification],
+      entities: [User, Verification, Restaurant, Category],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
