@@ -1,17 +1,26 @@
-import { Role } from "src/auth/role.decorator"
-import { AuthUser } from "src/auth/auth-user.decorator"
-import { Restaurant } from "./entities/restaurant.entity"
-import { RestaurantService } from "./restaurants.service"
-import { User, UserRole } from "src/users/entities/user.entity"
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
-import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
-import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
-import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
-import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
+import {
+  Args,
+  Int,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+} from "@nestjs/graphql"
 import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from "./dtos/delete-restaurant.dto"
+import { Role } from "src/auth/role.decorator"
+import { User } from "src/users/entities/user.entity"
+import { Category } from "./entities/cetegory.entity"
+import { AuthUser } from "src/auth/auth-user.decorator"
+import { Restaurant } from "./entities/restaurant.entity"
+import { RestaurantService } from "./restaurants.service"
+import { AllCategoriesOutput } from "./dtos/all-categories.dto"
+import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
+import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
+import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
+import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -48,5 +57,20 @@ export class RestaurantsResolver {
     @Args("input") deleteRestaurantInput: DeleteRestaurantInput,
   ): Promise<DeleteRestaurantOutput> {
     return this.restaurantService.deleteRestaurant(owner, deleteRestaurantInput)
+  }
+}
+
+@Resolver((of) => Category)
+export class CategoryResolver {
+  constructor(private readonly restaurantService: RestaurantService) {}
+
+  @ResolveField((type) => Int)
+  restaurantCount(): number {
+    return 80
+  }
+
+  @Query((type) => AllCategoriesOutput)
+  allCategories(): Promise<AllCategoriesOutput> {
+    return this.restaurantService.allCategories()
   }
 }
