@@ -6,6 +6,8 @@ import { User, UserRole } from "src/users/entities/user.entity"
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql"
 import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
+import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
+import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -22,5 +24,15 @@ export class RestaurantsResolver {
       authUser,
       createRestaurantInput,
     )
+  }
+
+  // Edit Restaurant
+  @Mutation((returns) => EditProfileOutput)
+  @Role(["Owner"])
+  editRestaurant(
+    @AuthUser() authUser: User,
+    @Args("input") editRestaurantInput: EditRestaurantInput,
+  ): EditProfileOutput {
+    return { ok: true }
   }
 }
