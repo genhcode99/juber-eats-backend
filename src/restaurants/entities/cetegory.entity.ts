@@ -12,16 +12,22 @@ import { CoreEntity } from "src/common/entities/core.entity"
 export class Category extends CoreEntity {
   // Name
   @Field((type) => String)
-  @Column()
+  @Column({ unique: true })
   @IsString()
   @Length(5, 10)
   name: string
 
   // Cover Image
-  @Field((type) => String)
-  @Column()
+  @Field((type) => String, { nullable: true })
+  @Column({ nullable: true })
   @IsString()
   coverImg: string
+
+  // Slug
+  @Field((type) => String)
+  @Column({ unique: true })
+  @IsString()
+  slug: string
 
   // Restaurants
   @Field((type) => [Restaurant])
