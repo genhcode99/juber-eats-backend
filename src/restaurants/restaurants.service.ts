@@ -7,6 +7,7 @@ import { Restaurant } from "./entities/restaurant.entity"
 import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
 import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
 import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
+import { CategoryRepository } from "./repositories/category.repository"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
 
 @Injectable()
@@ -15,22 +16,8 @@ export class RestaurantService {
     @InjectRepository(Restaurant)
     private readonly restaurantsDB: Repository<Restaurant>,
 
-    @InjectRepository(Category)
-    private readonly categoryDB: Repository<Category>,
+    private readonly categoryDB: CategoryRepository,
   ) {}
-
-  // Get or Create : Category
-  async getOrCreateCategory(name: string): Promise<Category> {
-    const categoryName = name.trim().toLowerCase()
-    const categorySlug = categoryName.replace(/ /g, "-")
-    let category = await this.categoryDB.findOne({ slug: categorySlug })
-    if (!category) {
-      category = await this.categoryDB.save(
-        this.categoryDB.create({ slug: categorySlug, name: categoryName }),
-      )
-    }
-    return category
-  }
 
   // Create Restaurant
   async createRestaurant(
@@ -41,7 +28,7 @@ export class RestaurantService {
       const newRestaurant = this.restaurantsDB.create(createRestaurantInput)
       newRestaurant.owner = owner
 
-      const category = await this.getOrCreateCategory(
+      const category = await this.categoryDB.getOrCreate(
         createRestaurantInput.categoryName,
       )
 
@@ -65,10 +52,10 @@ export class RestaurantService {
     editRestaurantInput: EditRestaurantInput,
   ): Promise<EditProfileOutput> {
     try {
+      // 1. 레스토랑이 존재하는지 확인
       const restaurants = await this.restaurantsDB.findOneOrFail(
         editRestaurantInput.restaurantId,
       )
-
       if (!restaurants) {
         return {
           ok: false,
@@ -76,12 +63,30 @@ export class RestaurantService {
         }
       }
 
+      // 2.레스토랑의 주인이 맞는지 확인
       if (owner.id !== restaurants.ownerId) {
         return {
           ok: false,
           error: "You can't edit a restaurant that you don't own",
         }
       }
+
+      // 3.카테고리 변경을 요청한 경우
+      let category: Category = null
+      if (editRestaurantInput.categoryName) {
+        category = await this.categoryDB.getOrCreate(
+          editRestaurantInput.categoryName,
+        )
+      }
+
+      // 4. 레스토랑 정보를 저장
+      await this.restaurantsDB.save([
+        {
+          id: editRestaurantInput.restaurantId,
+          ...editRestaurantInput,
+          ...(category && { category }),
+        },
+      ])
     } catch (e) {}
     return {
       ok: false,
