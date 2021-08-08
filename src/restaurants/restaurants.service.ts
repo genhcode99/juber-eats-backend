@@ -9,6 +9,10 @@ import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
 import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
 import { CategoryRepository } from "./repositories/category.repository"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
+import {
+  DeleteRestaurantInput,
+  DeleteRestaurantOutput,
+} from "./dtos/delete-restaurant.dto"
 
 @Injectable()
 export class RestaurantService {
@@ -95,6 +99,42 @@ export class RestaurantService {
     return {
       ok: false,
       error: "Could not edit Restaurant",
+    }
+  }
+
+  // Delete Restaurant
+  async deleteRestaurant(
+    owner: User,
+    { restaurantId }: DeleteRestaurantInput,
+  ): Promise<DeleteRestaurantOutput> {
+    try {
+      // 1. 레스토랑이 존재하는지 확인
+      const restaurants = await this.restaurantsDB.findOneOrFail(restaurantId)
+      if (!restaurants) {
+        return {
+          ok: false,
+          error: "Restaurant not found",
+        }
+      }
+
+      // 2.레스토랑의 주인이 맞는지 확인
+      if (owner.id !== restaurants.ownerId) {
+        return {
+          ok: false,
+          error: "You can't delete a restaurant that you don't own",
+        }
+      }
+
+      // 3. 레스토랑 삭제
+      await this.restaurantsDB.delete(restaurantId)
+
+      return {
+        ok: true,
+      }
+    } catch (e) {}
+    return {
+      ok: false,
+      error: "Could not delete Restaurant",
     }
   }
 }
