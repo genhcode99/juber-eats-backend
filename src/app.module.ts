@@ -17,6 +17,7 @@ import { Category } from "./restaurants/entities/cetegory.entity"
 import { Verification } from "./users/entities/verification.entity"
 import { RestaurantsModule } from "./restaurants/restaurants.module"
 import { Restaurant } from "./restaurants/entities/restaurant.entity"
+import { AuthModule } from "./auth/auth.module"
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { Restaurant } from "./restaurants/entities/restaurant.entity"
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+    AuthModule,
     UsersModule,
     RestaurantsModule,
   ],

@@ -13,7 +13,7 @@ export class RestaurantsResolver {
 
   // Create Restaurant
   @Mutation((returns) => CreateAccountOutput)
-  @Role("Owner")
+  @Role(["Owner"])
   async createRestaurant(
     @AuthUser() authUser: User,
     @Args("input") createRestaurantInput: CreateRestaurantInput,
