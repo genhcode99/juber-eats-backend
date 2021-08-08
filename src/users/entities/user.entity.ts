@@ -6,10 +6,10 @@ import { Restaurant } from "src/restaurants/entities/restaurant.entity"
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from "typeorm"
 import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql"
 
-enum UserRole {
-  Client,
-  Owner,
-  Delivery,
+export enum UserRole {
+  Client = "Client",
+  Owner = "Owner",
+  Delivery = "Delivery",
 }
 
 registerEnumType(UserRole, { name: "UserRole" })
