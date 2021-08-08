@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from "typeorm"
+import { Column, Entity, ManyToOne, RelationId } from "typeorm"
 import { IsString, Length } from "class-validator"
 import { Field, InputType, ObjectType } from "@nestjs/graphql"
 import { CoreEntity } from "src/common/entities/core.entity"
@@ -43,4 +43,7 @@ export class Restaurant extends CoreEntity {
     onDelete: "CASCADE",
   })
   owner: User
+
+  @RelationId((restaurant: Restaurant) => restaurant.owner)
+  ownerId: number
 }
