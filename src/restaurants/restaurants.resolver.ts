@@ -8,6 +8,10 @@ import {
   Resolver,
 } from "@nestjs/graphql"
 import {
+  AllRestaurantsInput,
+  AllRestaurantsOutput,
+} from "./dtos/allRestaurants.dto"
+import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from "./dtos/delete-restaurant.dto"
@@ -59,6 +63,14 @@ export class RestaurantsResolver {
     @Args("input") deleteRestaurantInput: DeleteRestaurantInput,
   ): Promise<DeleteRestaurantOutput> {
     return this.restaurantService.deleteRestaurant(owner, deleteRestaurantInput)
+  }
+
+  // Find Restaurants
+  @Query((returns) => AllRestaurantsOutput)
+  allRestaurants(
+    @Args("input") allRestaurantsInput: AllRestaurantsInput,
+  ): Promise<AllRestaurantsOutput> {
+    return this.restaurantService.allRestaurants(allRestaurantsInput)
   }
 }
 
