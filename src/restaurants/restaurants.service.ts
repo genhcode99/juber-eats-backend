@@ -154,4 +154,9 @@ export class RestaurantService {
       }
     }
   }
+
+  // Count Restaurant
+  countRestaurant(category: Category) {
+    return this.restaurantsDB.count({ category })
+  }
 }
