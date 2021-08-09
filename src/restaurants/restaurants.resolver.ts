@@ -27,6 +27,11 @@ import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
 import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
 import { CategoryInput, CategoryOutput } from "./dtos/category.dto"
+import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant.dto"
+import {
+  SearchRestaurantsInput,
+  SearchRestaurantsOutput,
+} from "./dtos/search-restaurants.dto"
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -65,12 +70,28 @@ export class RestaurantsResolver {
     return this.restaurantService.deleteRestaurant(owner, deleteRestaurantInput)
   }
 
-  // Find Restaurants
+  // All Restaurants
   @Query((returns) => AllRestaurantsOutput)
   allRestaurants(
     @Args("input") allRestaurantsInput: AllRestaurantsInput,
   ): Promise<AllRestaurantsOutput> {
     return this.restaurantService.allRestaurants(allRestaurantsInput)
+  }
+
+  // Restaurant
+  @Query((returns) => RestaurantOutput)
+  restaurant(
+    @Args("input") restaurantInput: RestaurantInput,
+  ): Promise<RestaurantOutput> {
+    return this.restaurantService.findRestaurantById(restaurantInput)
+  }
+
+  // Search Restaurant
+  @Query((returns) => SearchRestaurantsOutput)
+  searchRestaurant(
+    @Args("input") searchRestaurantsInput: SearchRestaurantsInput,
+  ): Promise<SearchRestaurantsOutput> {
+    return this.restaurantService.SearchRestaurantByName(searchRestaurantsInput)
   }
 }
 

@@ -1,4 +1,4 @@
-import { Repository } from "typeorm"
+import { Repository, Like } from "typeorm"
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { User } from "src/users/entities/user.entity"
@@ -19,6 +19,11 @@ import {
   AllRestaurantsInput,
   AllRestaurantsOutput,
 } from "./dtos/allRestaurants.dto"
+import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant.dto"
+import {
+  SearchRestaurantsInput,
+  SearchRestaurantsOutput,
+} from "./dtos/search-restaurants.dto"
 
 @Injectable()
 export class RestaurantService {
@@ -223,6 +228,47 @@ export class RestaurantService {
       return {
         ok: false,
         error: "Could not load restaurants",
+      }
+    }
+  }
+
+  // Restaurant
+  async findRestaurantById({
+    restaurantId,
+  }: RestaurantInput): Promise<RestaurantOutput> {
+    try {
+      const restaurant = await this.restaurantsDB.findOneOrFail(restaurantId)
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: "Restaurant not found",
+        }
+      }
+      return {
+        ok: true,
+        restaurant,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could not find restaurant",
+      }
+    }
+  }
+
+  // Search Restaurant
+  async SearchRestaurantByName({
+    query,
+    page,
+  }: SearchRestaurantsInput): Promise<SearchRestaurantsOutput> {
+    try {
+      const [results, totalResults] = await this.restaurantsDB.findAndCount({
+        where: { name: Like(`%${query}%`) },
+      })
+    } catch (e) {
+      return {
+        ok: false,
+        error: "",
       }
     }
   }
