@@ -14,6 +14,7 @@ import {
   DeleteRestaurantOutput,
 } from "./dtos/delete-restaurant.dto"
 import { AllCategoriesOutput } from "./dtos/all-categories.dto"
+import { CategoryInput, CategoryOutput } from "./dtos/category.dto"
 
 @Injectable()
 export class RestaurantService {
@@ -158,5 +159,30 @@ export class RestaurantService {
   // Count Restaurant
   countRestaurant(category: Category) {
     return this.restaurantsDB.count({ category })
+  }
+
+  // Find Category by Category
+  async findCategoryBySlug({ slug }: CategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categoryDB.findOne(
+        { slug },
+        { relations: ["restaurants"] },
+      )
+      if (!category) {
+        return {
+          ok: false,
+          error: "Category not found",
+        }
+      }
+      return {
+        ok: true,
+        category,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could not load category",
+      }
+    }
   }
 }

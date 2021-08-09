@@ -22,6 +22,7 @@ import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
 import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
 import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
+import { CategoryInput, CategoryOutput } from "./dtos/category.dto"
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -73,5 +74,12 @@ export class CategoryResolver {
   @Query((type) => AllCategoriesOutput)
   allCategories(): Promise<AllCategoriesOutput> {
     return this.restaurantService.allCategories()
+  }
+
+  @Query((type) => CategoryOutput)
+  findCategoryBySlug(
+    @Args() categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    return this.restaurantService.findCategoryBySlug(categoryInput)
   }
 }
