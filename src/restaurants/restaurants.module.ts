@@ -8,10 +8,11 @@ import {
   DishResolver,
   RestaurantsResolver,
 } from "./restaurants.resolver"
+import { Dish } from "./entities/dish.entity"
 
 @Module({
   // [TypeOrmModule.forFeature([Restaurant])] -> Repository 를 import 함.
-  imports: [TypeOrmModule.forFeature([Restaurant, CategoryRepository])],
+  imports: [TypeOrmModule.forFeature([Restaurant, Dish, CategoryRepository])],
   providers: [
     RestaurantsResolver,
     CategoryResolver,

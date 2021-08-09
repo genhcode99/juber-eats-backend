@@ -25,12 +25,16 @@ import {
   SearchRestaurantsOutput,
 } from "./dtos/search-restaurants.dto"
 import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto"
+import { Dish } from "./entities/dish.entity"
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantsDB: Repository<Restaurant>,
+
+    @InjectRepository(Dish)
+    private readonly dishDB: Repository<Dish>,
 
     private readonly categoryDB: CategoryRepository,
   ) {}
@@ -292,6 +296,33 @@ export class RestaurantService {
     createDishInput: CreateDishInput,
   ): Promise<CreateDishOutput> {
     try {
+      // 1. 레스토랑 찾기
+      const restaurant = await this.restaurantsDB.findOne(
+        createDishInput.restaurantId,
+      )
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: "Restaurant Not Found",
+        }
+      }
+
+      // 2. 로그인된 유저가 레스토랑의 주인인지 확인.
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: "You are not restaurant owner",
+        }
+      }
+
+      // 3. Dish 생성
+      await this.dishDB.save(
+        this.dishDB.create({ ...createDishInput, restaurant }),
+      )
+
+      return {
+        ok: true,
+      }
     } catch (e) {
       return {
         ok: false,
