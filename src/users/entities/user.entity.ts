@@ -5,6 +5,7 @@ import { IsBoolean, IsEmail, IsEnum, IsString } from "class-validator"
 import { Restaurant } from "src/restaurants/entities/restaurant.entity"
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from "typeorm"
 import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql"
+import { Order } from "src/orders/entities/order.entity"
 
 export enum UserRole {
   Client = "Client",
@@ -46,6 +47,20 @@ export class User extends CoreEntity {
   @Field((type) => [Restaurant])
   @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
   restaurants: Restaurant[]
+
+  // Orders
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.customer, {
+    onDelete: "SET NULL",
+  })
+  orders?: Order[]
+
+  // Rides
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.driver, {
+    onDelete: "SET NULL",
+  })
+  rides?: Order[]
 
   @BeforeInsert()
   @BeforeUpdate()

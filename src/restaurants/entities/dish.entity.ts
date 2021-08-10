@@ -69,4 +69,6 @@ export class Dish extends CoreEntity {
   @Field((type) => [DishOptions], { nullable: true })
   @Column({ type: "json", nullable: true })
   options?: DishOptions[]
+
+  // Order Relationship
 }
