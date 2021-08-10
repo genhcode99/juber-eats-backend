@@ -10,6 +10,8 @@ import { User } from "src/users/entities/user.entity"
 import { CoreEntity } from "src/common/entities/core.entity"
 import { Dish } from "src/restaurants/entities/dish.entity"
 import { Restaurant } from "src/restaurants/entities/restaurant.entity"
+import { OrderItem } from "./order-item.entity"
+import { IsEnum, IsNumber } from "class-validator"
 
 export enum OderStatus {
   Pending = "Pending",
@@ -43,16 +45,18 @@ export class Order extends CoreEntity {
   restaurant: Restaurant
 
   // Many to Many 에서 JoinTable 은 owning side에 한번만 사용한다.
-  @Field((type) => [Dish])
-  @ManyToMany((type) => Dish)
+  @Field((type) => [OrderItem])
+  @ManyToMany((type) => OrderItem)
   @JoinTable()
-  dishes: Dish[]
+  items: OrderItem[]
 
   @Field((type) => Float, { nullable: true })
   @Column({ nullable: true })
+  @IsNumber()
   total?: number
 
   @Field((type) => OderStatus)
   @Column({ type: "enum", enum: OderStatus })
+  @IsEnum(OderStatus)
   status: OderStatus
 }
