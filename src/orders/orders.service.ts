@@ -39,6 +39,8 @@ export class OrdersService {
         }
       }
 
+      let orderFinalPrice = 0
+      const orderItems: OrderItem[] = []
       for (const item of items) {
         const dish = await this.dishesDB.findOne(item.dishId)
         if (!dish) {
@@ -47,40 +49,49 @@ export class OrdersService {
             error: "Dish Not Found",
           }
         }
-        console.log(`Dish price: ${dish.price}`)
+        let dishFinalPrice = dish.price
+
         for (const itemOption of item.options) {
           const dishOption = dish.options.find(
             (dishOption) => dishOption.name === itemOption.name,
           )
           if (dishOption) {
             if (dishOption.extra) {
-              console.log(`$USD + ${dishOption.extra}`)
+              dishFinalPrice = dishFinalPrice + dishOption.extra
             } else {
               const dishOptionChoice = dishOption.choice.find(
                 (optionChoice) => optionChoice.name === itemOption.choice,
               )
               if (dishOptionChoice) {
                 if (dishOptionChoice.extra) {
-                  console.log(`$USD + ${dishOptionChoice.extra}`)
+                  dishFinalPrice = dishFinalPrice + dishOptionChoice.extra
                 }
               }
             }
           }
         }
+        orderFinalPrice = orderFinalPrice + dishFinalPrice
 
-        // await this.orderItemsDB.save(
-        //   this.orderItemsDB.create({
-        //     dish,
-        //     options: item.options,
-        //   }),
-        // )
+        const orderitem = await this.orderItemsDB.save(
+          this.orderItemsDB.create({
+            dish,
+            options: item.options,
+          }),
+        )
+        orderItems.push(orderitem)
       }
-      // const order = await this.ordersDB.save(
-      //   this.ordersDB.create({
-      //     customer,
-      //     restaurant,
-      //   }),
-      // )
+
+      const order = await this.ordersDB.save(
+        this.ordersDB.create({
+          customer,
+          restaurant,
+          total: orderFinalPrice,
+          items: orderItems,
+        }),
+      )
+      return {
+        ok: true,
+      }
     } catch (e) {
       return {
         ok: false,
