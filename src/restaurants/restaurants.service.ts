@@ -26,6 +26,8 @@ import {
 } from "./dtos/search-restaurants.dto"
 import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto"
 import { Dish } from "./entities/dish.entity"
+import { EditDishInput, EditDishOutput } from "./dtos/edit-dish.dto"
+import { DeleteDishInput, DeleteDishOutput } from "./dtos/delete-dish.dto"
 
 @Injectable()
 export class RestaurantService {
@@ -327,6 +329,82 @@ export class RestaurantService {
       return {
         ok: false,
         error: "Could not create Dish",
+      }
+    }
+  }
+
+  // Edit Dish
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      // 1. Dish 의 존재확인
+      const dish = await this.dishDB.findOne(editDishInput.dishId, {
+        relations: ["restaurant"],
+      })
+      if (!dish) {
+        return {
+          ok: false,
+          error: "Dish Not Found",
+        }
+      }
+
+      // 2. Dish 주인유저 확인
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: "You Are Not Restaurant Owner",
+        }
+      }
+
+      // 3. Dish Update
+      await this.dishDB.save([{ id: editDishInput.dishId, ...editDishInput }])
+      return {
+        ok: true,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could Not Delete Dish",
+      }
+    }
+  }
+
+  // Delete Dish
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    try {
+      // 1. Dish 의 존재확인
+      const dish = await this.dishDB.findOne(dishId, {
+        relations: ["restaurant"],
+      })
+      if (!dish) {
+        return {
+          ok: false,
+          error: "Dish Not Found",
+        }
+      }
+
+      // 2. Dish 주인유저 확인
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: "You Are Not Restaurant Owner",
+        }
+      }
+
+      // 3. Dish 삭제
+      await this.dishDB.delete(dishId)
+      return {
+        ok: true,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could Not Delete Dish",
       }
     }
   }
