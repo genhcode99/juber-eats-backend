@@ -26,24 +26,28 @@ registerEnumType(OderStatus, { name: "OderStatus" })
 @ObjectType()
 @Entity()
 export class Order extends CoreEntity {
+  // Customer
   @Field((type) => User, { nullable: true })
   @ManyToOne((type) => User, (user) => user.orders, {
     onDelete: "SET NULL",
   })
   customer?: User
 
+  // Driver
   @Field((type) => User, { nullable: true })
   @ManyToOne((type) => User, (user) => user.rides, {
     onDelete: "SET NULL",
   })
   driver?: User
 
-  @Field((type) => Restaurant)
+  // Restaurant
+  @Field((type) => Restaurant, { nullable: true })
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.orders, {
     onDelete: "SET NULL",
   })
-  restaurant: Restaurant
+  restaurant?: Restaurant
 
+  // Items
   // Many to Many 에서 JoinTable 은 owning side에 한번만 사용한다.
   @Field((type) => [OrderItem])
   @ManyToMany((type) => OrderItem)
@@ -56,7 +60,7 @@ export class Order extends CoreEntity {
   total?: number
 
   @Field((type) => OderStatus)
-  @Column({ type: "enum", enum: OderStatus })
+  @Column({ type: "enum", enum: OderStatus, default: OderStatus.Pending })
   @IsEnum(OderStatus)
   status: OderStatus
 }

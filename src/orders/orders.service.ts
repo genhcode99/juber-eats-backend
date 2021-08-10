@@ -30,6 +30,15 @@ export class OrdersService {
           error: "Restaurant Not Found",
         }
       }
+
+      const order = await this.ordersDB.save(
+        this.ordersDB.create({
+          customer,
+          restaurant,
+        }),
+      )
+
+      console.log(order)
     } catch (e) {
       return {
         ok: false,
