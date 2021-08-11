@@ -5,6 +5,7 @@ import { Restaurant } from "src/restaurants/entities/restaurant.entity"
 import { User, UserRole } from "src/users/entities/user.entity"
 import { Repository } from "typeorm"
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto"
+import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto"
 import { GetOrdersInput, GetOrdersOutput } from "./dtos/get-orders.dto"
 import { OrderItem } from "./entities/order-item.entity"
 import { Order } from "./entities/order.entity"
@@ -101,7 +102,7 @@ export class OrdersService {
     }
   }
 
-  // GetOrders
+  // Get OrderS
   async getOrders(
     user: User,
     { status }: GetOrdersInput,
@@ -109,15 +110,30 @@ export class OrdersService {
     try {
       let orders: Order[]
       if (user.role === UserRole.Client) {
-        orders = await this.ordersDB.find({ where: { customer: user } })
+        orders = await this.ordersDB.find({
+          where: {
+            customer: user,
+            ...(status && { status }),
+          },
+        })
       } else if (user.role === UserRole.Delivery) {
-        orders = await this.ordersDB.find({ where: { driver: user } })
+        orders = await this.ordersDB.find({
+          where: {
+            driver: user,
+            ...(status && { status }),
+          },
+        })
       } else if (user.role === UserRole.Owner) {
         const restaurants = await this.restaurantsDB.find({
           where: { owner: user },
           relations: ["orders"],
         })
         orders = restaurants.map((restaurant) => restaurant.orders).flat(1)
+        if (orders) {
+          if (status) {
+            orders = orders.filter((order) => order.status === status)
+          }
+        }
       }
       return {
         ok: true,
@@ -129,5 +145,47 @@ export class OrdersService {
         error: "Could Not get Orders",
       }
     }
+  }
+
+  // Get Order
+  async getOrder(
+    user: User,
+    { id: orderId }: GetOrderInput,
+  ): Promise<GetOrderOutput> {
+    try {
+      const order = await this.ordersDB.findOne(orderId, {
+        relations: ["restaurant"],
+      })
+      if (!order) {
+        return {
+          ok: false,
+          error: "Order Not Found",
+        }
+      }
+
+      let canSee = true
+      if (user.role === UserRole.Client && order.customerId !== user.id) {
+        canSee: false
+      }
+      if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+        canSee: false
+      }
+      if (
+        user.role === UserRole.Owner &&
+        order.restaurant.ownerId !== user.id
+      ) {
+        canSee: false
+      }
+      if (!canSee) {
+        return {
+          ok: false,
+          error: "You can't see that",
+        }
+      }
+      return {
+        ok: true,
+        order,
+      }
+    } catch (e) {}
   }
 }
