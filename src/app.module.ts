@@ -66,9 +66,13 @@ import { OrderItem } from "./orders/entities/order-item.entity"
     GraphQLModule.forRoot({
       installSubscriptionHandlers: true,
       autoSchemaFile: true,
-      context: ({ req }) => {
-        console.log(req)
-        return { user: req["user"] }
+      // http 링크에는 req가 있고 websoket에는 connection 이 있다.
+      context: ({ req, connection }) => {
+        if (req) {
+          return { user: req["user"] }
+        } else {
+          console.log(connection)
+        }
       },
     }),
     JwtModule.forRoot({
