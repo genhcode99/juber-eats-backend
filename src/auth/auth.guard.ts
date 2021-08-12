@@ -3,12 +3,18 @@ import { GqlExecutionContext } from "@nestjs/graphql"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { AllowedRoles } from "./role.decorator"
 import { User } from "src/users/entities/user.entity"
+import { JwtService } from "src/jwt/jwt.service"
+import { UsersService } from "src/users/users.service"
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+  ) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     // 메타데이터에서 role 가져오기
     const roles = this.reflector.get<AllowedRoles>(
       "roles",
@@ -19,15 +25,25 @@ export class AuthGuard implements CanActivate {
     }
 
     const gqlContext = GqlExecutionContext.create(context).getContext()
-    console.log(gqlContext.token)
-    const user: User = gqlContext["user"]
-    if (!user) {
+    const token = gqlContext.token
+    if (token) {
+      const decoded = this.jwtService.verify(token.toString())
+      if (typeof decoded === "object" && decoded.hasOwnProperty("id")) {
+        const { user } = await this.usersService.findById(decoded["id"])
+        if (!user) {
+          return false
+        }
+        gqlContext["user"] = user
+
+        if (roles.includes("Any")) {
+          return true
+        }
+        return roles.includes(user.role)
+      } else {
+        return false
+      }
+    } else {
       return false
     }
-
-    if (roles.includes("Any")) {
-      return true
-    }
-    return roles.includes(user.role)
   }
 }
