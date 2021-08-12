@@ -20,6 +20,7 @@ export class OrderItemOption {
 @Entity()
 export class OrderItem extends CoreEntity {
   // Dish
+  @Field((type) => Dish)
   @ManyToOne((type) => Dish, { onDelete: "CASCADE" })
   dish: Dish
 
