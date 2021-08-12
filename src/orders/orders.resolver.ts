@@ -66,7 +66,8 @@ export class OrdersResolver {
 
   // Subscription
   @Subscription((retruns) => String)
-  readyPotatoes() {
+  @Role(["Any"])
+  readyPotatoes(@AuthUser() user: User) {
     return pubsub.asyncIterator("hotPotatos")
   }
 }
