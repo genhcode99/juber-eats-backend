@@ -23,6 +23,7 @@ import { IsEnum, IsNumber } from "class-validator"
 export enum OderStatus {
   Pending = "Pending",
   Cooking = "Cooking",
+  Cooked = "Cooked",
   PickedUp = "PickedUp",
   Delivered = "Delivered",
 }
