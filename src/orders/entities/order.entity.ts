@@ -38,6 +38,7 @@ export class Order extends CoreEntity {
   @Field((type) => User, { nullable: true })
   @ManyToOne((type) => User, (user) => user.orders, {
     onDelete: "SET NULL",
+    eager: true,
   })
   customer?: User
 
@@ -48,6 +49,7 @@ export class Order extends CoreEntity {
   @Field((type) => User, { nullable: true })
   @ManyToOne((type) => User, (user) => user.rides, {
     onDelete: "SET NULL",
+    eager: true,
   })
   driver?: User
 
@@ -58,13 +60,14 @@ export class Order extends CoreEntity {
   @Field((type) => Restaurant, { nullable: true })
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.orders, {
     onDelete: "SET NULL",
+    eager: true,
   })
   restaurant?: Restaurant
 
   // Items
   // Many to Many 에서 JoinTable 은 owning side에 한번만 사용한다.
   @Field((type) => [OrderItem])
-  @ManyToMany((type) => OrderItem)
+  @ManyToMany((type) => OrderItem, { eager: true })
   @JoinTable()
   items: OrderItem[]
 

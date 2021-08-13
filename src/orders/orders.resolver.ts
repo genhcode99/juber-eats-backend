@@ -15,6 +15,7 @@ import {
   NEW_PENDING_ORDER,
   PUB_SUB,
 } from "src/common/common.constants"
+import { OrderUpdatesInput } from "./dtos/order-updates.dto"
 
 @Resolver((of) => Order)
 export class OrdersResolver {
@@ -77,10 +78,15 @@ export class OrdersResolver {
     return this.pubSub.asyncIterator(NEW_PENDING_ORDER)
   }
 
-  //  => Subscription
+  //  cookedOrders => Subscription
   @Subscription((retruns) => Order)
   @Role(["Delivery"])
   cookedOrders() {
     return this.pubSub.asyncIterator(NEW_COOKED_ORDER)
   }
+
+  // cookedOrders => Subscription
+  @Subscription((returns) => Order)
+  @Role(["Any"])
+  orderUpdates(@Args("input") orderUpdatesInput: OrderUpdatesInput)
 }
