@@ -6,6 +6,7 @@ import { Restaurant } from "src/restaurants/entities/restaurant.entity"
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from "typeorm"
 import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql"
 import { Order } from "src/orders/entities/order.entity"
+import { Payment } from "src/payments/entities/payment.entity"
 
 export enum UserRole {
   Client = "Client",
@@ -54,6 +55,11 @@ export class User extends CoreEntity {
     onDelete: "SET NULL",
   })
   orders?: Order[]
+
+  // Payments
+  @Field((type) => [Payment])
+  @OneToMany((type) => Payment, (payment) => payment.user)
+  payments: Payment[]
 
   // Rides
   @Field((type) => [Order])
