@@ -3,7 +3,14 @@ import { Order } from "./entities/order.entity"
 import { OrdersService } from "./orders.service"
 import { User } from "src/users/entities/user.entity"
 import { AuthUser } from "src/auth/auth-user.decorator"
-import { Args, Mutation, Query, Resolver, Subscription } from "@nestjs/graphql"
+import {
+  Args,
+  Context,
+  Mutation,
+  Query,
+  Resolver,
+  Subscription,
+} from "@nestjs/graphql"
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto"
 import { GetOrdersInput, GetOrdersOutput } from "./dtos/get-orders.dto"
 import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto"
@@ -12,6 +19,7 @@ import { Inject } from "@nestjs/common"
 import { PubSub } from "graphql-subscriptions"
 import {
   NEW_COOKED_ORDER,
+  NEW_ORDER_UPDATE,
   NEW_PENDING_ORDER,
   PUB_SUB,
 } from "src/common/common.constants"
@@ -86,7 +94,24 @@ export class OrdersResolver {
   }
 
   // cookedOrders => Subscription
-  @Subscription((returns) => Order)
+  @Subscription((returns) => Order, {
+    filter: (
+      { orderUpdates }: { orderUpdates: Order },
+      { input }: { input: OrderUpdatesInput },
+      { user }: { user: User },
+    ) => {
+      if (
+        orderUpdates.driverId !== user.id &&
+        orderUpdates.customerId !== user.id &&
+        orderUpdates.restaurant.ownerId !== user.id
+      ) {
+        return false
+      }
+      return orderUpdates.id === input.id
+    },
+  })
   @Role(["Any"])
-  orderUpdates(@Args("input") orderUpdatesInput: OrderUpdatesInput)
+  orderUpdates(@Args("input") orderUpdatesInput: OrderUpdatesInput) {
+    return this.pubSub.asyncIterator(NEW_ORDER_UPDATE)
+  }
 }
