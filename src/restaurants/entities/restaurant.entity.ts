@@ -17,14 +17,13 @@ export class Restaurant extends CoreEntity {
   @Field((type) => String)
   @Column()
   @IsString()
-  @Length(5)
+  @Length(3)
   name: string
 
   // Cover Image
-  @Field((type) => String)
-  @Column()
-  @IsString()
-  coverImg: string
+  @Field((type) => String, { nullable: true })
+  @Column({ nullable: true })
+  coverImg?: string
 
   // Address
   @Field((type) => String)
