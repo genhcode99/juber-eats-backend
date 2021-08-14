@@ -1,30 +1,25 @@
-import {
-  Module,
-  NestModule,
-  RequestMethod,
-  MiddlewareConsumer,
-} from "@nestjs/common"
 import * as Joi from "joi"
+import { Module } from "@nestjs/common"
 import { JwtModule } from "./jwt/jwt.module"
 import { ConfigModule } from "@nestjs/config"
 import { AuthModule } from "./auth/auth.module"
 import { MailModule } from "./mail/mail.module"
 import { GraphQLModule } from "@nestjs/graphql"
 import { TypeOrmModule } from "@nestjs/typeorm"
+import { ScheduleModule } from "@nestjs/schedule"
 import { UsersModule } from "./users/users.module"
 import { User } from "./users/entities/user.entity"
-import { JwtMiddleware } from "./jwt/jwt.middleware"
+import { OrdersModule } from "./orders/orders.module"
+import { CommonModule } from "./common/common.module"
+import { Order } from "./orders/entities/order.entity"
 import { Dish } from "./restaurants/entities/dish.entity"
+import { PaymentsModule } from "./payments/payments.module"
+import { Payment } from "./payments/entities/payment.entity"
+import { OrderItem } from "./orders/entities/order-item.entity"
 import { Category } from "./restaurants/entities/cetegory.entity"
 import { Verification } from "./users/entities/verification.entity"
 import { RestaurantsModule } from "./restaurants/restaurants.module"
 import { Restaurant } from "./restaurants/entities/restaurant.entity"
-import { OrdersModule } from "./orders/orders.module"
-import { Order } from "./orders/entities/order.entity"
-import { OrderItem } from "./orders/entities/order-item.entity"
-import { CommonModule } from "./common/common.module"
-import { PaymentsModule } from "./payments/payments.module"
-import { Payment } from "./payments/entities/payment.entity"
 
 @Module({
   imports: [
@@ -67,6 +62,7 @@ import { Payment } from "./payments/entities/payment.entity"
         Payment,
       ],
     }),
+
     GraphQLModule.forRoot({
       installSubscriptionHandlers: true,
       autoSchemaFile: true,
@@ -78,14 +74,19 @@ import { Payment } from "./payments/entities/payment.entity"
         }
       },
     }),
+
+    ScheduleModule.forRoot(),
+
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
+
     MailModule.forRoot({
       apiKey: process.env.MAILGUN_API_KEY,
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+
     AuthModule,
     UsersModule,
     RestaurantsModule,
