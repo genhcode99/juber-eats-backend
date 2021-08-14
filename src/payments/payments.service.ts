@@ -97,5 +97,6 @@ export class PaymentsService {
   @Timeout("checkForPaymentsI", 500)
   afterStarts() {
     console.log("congrats")
+    console.log("hi")
   }
 }
