@@ -63,4 +63,13 @@ export class Restaurant extends CoreEntity {
     onDelete: "SET NULL",
   })
   orders: Order[]
+
+  // isPromoted
+  @Field((type) => Boolean)
+  @Column({ default: false })
+  isPromoted: boolean
+
+  @Field((type) => Date, { nullable: true })
+  @Column({ nullable: true })
+  promotedUntil: Date
 }

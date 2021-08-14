@@ -55,6 +55,13 @@ export class PaymentsService {
         }),
       )
 
+      // 4. restaurant Promoted
+      restaurant.isPromoted = true
+      const date = new Date()
+      date.setDate(date.getDate() + 7)
+      restaurant.promotedUntil = date
+      this.restaurantsDB.save(restaurant)
+
       return {
         ok: true,
       }
@@ -80,23 +87,5 @@ export class PaymentsService {
         error: "Could Not load Payments",
       }
     }
-  }
-
-  @Cron("30 * * * * *", { name: "myjob" })
-  async checkForPayments() {
-    console.log("Checking for payment(Cron)")
-    const job = this.schedulerRegistry.getCronJob("myjob")
-    console.log(job)
-  }
-
-  @Interval(5000)
-  async checkForPaymentsI() {
-    console.log("Checking for payment(interval)")
-  }
-
-  @Timeout("checkForPaymentsI", 500)
-  afterStarts() {
-    console.log("congrats")
-    console.log("hi")
   }
 }

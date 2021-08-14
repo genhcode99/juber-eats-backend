@@ -195,6 +195,10 @@ export class RestaurantService {
         where: { category },
         take: 5,
         skip: (page - 1) * 5,
+        order: {
+          isPromoted: "DESC",
+          createdAt: "ASC",
+        },
       })
 
       const totalRestaurant = await this.countRestaurant(category)
@@ -222,6 +226,10 @@ export class RestaurantService {
         {
           take: 5,
           skip: (page - 1) * 5,
+          order: {
+            isPromoted: "DESC",
+            createdAt: "ASC",
+          },
         },
       )
 
