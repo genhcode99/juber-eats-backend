@@ -8,6 +8,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe())
 
+  // 프론트엔드가 사진업로드를 할수 있도록 허가해줌
+  app.enableCors()
+
   await app.listen(4000)
 }
 bootstrap()
