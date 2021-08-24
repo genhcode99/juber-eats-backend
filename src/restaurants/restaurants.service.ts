@@ -28,6 +28,7 @@ import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto"
 import { Dish } from "./entities/dish.entity"
 import { EditDishInput, EditDishOutput } from "./dtos/edit-dish.dto"
 import { DeleteDishInput, DeleteDishOutput } from "./dtos/delete-dish.dto"
+import { MyRestaurantOutput } from "./dtos/my-restaurants.dto"
 
 @Injectable()
 export class RestaurantService {
@@ -193,8 +194,8 @@ export class RestaurantService {
 
       const restaurants = await this.restaurantsDB.find({
         where: { category },
-        take: 5,
-        skip: (page - 1) * 5,
+        take: 3,
+        skip: (page - 1) * 3,
         order: {
           isPromoted: "DESC",
           createdAt: "ASC",
@@ -207,7 +208,8 @@ export class RestaurantService {
         ok: true,
         restaurants,
         category,
-        totalPages: Math.ceil(totalRestaurant / 5),
+        totalPages: Math.ceil(totalRestaurant / 3),
+        totalResults: totalRestaurant,
       }
     } catch (e) {
       return {
@@ -224,12 +226,13 @@ export class RestaurantService {
     try {
       const [restaurants, totalResults] = await this.restaurantsDB.findAndCount(
         {
-          take: 5,
-          skip: (page - 1) * 5,
+          take: 3,
+          skip: (page - 1) * 3,
           order: {
             isPromoted: "DESC",
             createdAt: "ASC",
           },
+          relations: ["category"],
         },
       )
 
@@ -237,7 +240,7 @@ export class RestaurantService {
         ok: true,
         results: restaurants,
         totalResults,
-        totalPages: Math.ceil(totalResults / 5),
+        totalPages: Math.ceil(totalResults / 3),
       }
     } catch (e) {
       return {
@@ -253,7 +256,7 @@ export class RestaurantService {
   }: RestaurantInput): Promise<RestaurantOutput> {
     try {
       const restaurant = await this.restaurantsDB.findOneOrFail(restaurantId, {
-        relations: ["menu"],
+        relations: ["menu", "category"],
       })
       if (!restaurant) {
         return {
@@ -269,6 +272,21 @@ export class RestaurantService {
       return {
         ok: false,
         error: "Could not find restaurant",
+      }
+    }
+  }
+  // My Restaurants
+  async myRestaurants(owner: User): Promise<MyRestaurantOutput> {
+    try {
+      const restaurants = await this.restaurantsDB.find({ owner })
+      return {
+        ok: true,
+        restaurants,
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: "Could not find restaurants.",
       }
     }
   }
