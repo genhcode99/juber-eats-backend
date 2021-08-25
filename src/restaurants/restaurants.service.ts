@@ -6,7 +6,10 @@ import { Category } from "./entities/cetegory.entity"
 import { Restaurant } from "./entities/restaurant.entity"
 import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
 import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
-import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
+import {
+  CreateRestaurantInput,
+  CreateRestaurantOutput,
+} from "./dtos/create-restaurant.dto"
 import { CategoryRepository } from "./repositories/category.repository"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
 import {
@@ -46,7 +49,7 @@ export class RestaurantService {
   async createRestaurant(
     owner: User,
     createRestaurantInput: CreateRestaurantInput,
-  ): Promise<CreateAccountOutput> {
+  ): Promise<CreateRestaurantOutput> {
     try {
       const newRestaurant = this.restaurantsDB.create(createRestaurantInput)
       newRestaurant.owner = owner
@@ -59,6 +62,7 @@ export class RestaurantService {
       await this.restaurantsDB.save(newRestaurant)
       return {
         ok: true,
+        restaurantId: newRestaurant.id,
         error: null,
       }
     } catch (e) {

@@ -24,7 +24,10 @@ import { RestaurantService } from "./restaurants.service"
 import { AllCategoriesOutput } from "./dtos/all-categories.dto"
 import { EditRestaurantInput } from "./dtos/edit-restaurant.dto"
 import { EditProfileOutput } from "src/users/dtos/edit-profile.dto"
-import { CreateRestaurantInput } from "./dtos/create-restaurant.dto"
+import {
+  CreateRestaurantInput,
+  CreateRestaurantOutput,
+} from "./dtos/create-restaurant.dto"
 import { CreateAccountOutput } from "src/users/dtos/create-account.dto"
 import { CategoryInput, CategoryOutput } from "./dtos/category.dto"
 import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant.dto"
@@ -43,12 +46,12 @@ export class RestaurantsResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
   // Create Restaurant
-  @Mutation((returns) => CreateAccountOutput)
+  @Mutation((returns) => CreateRestaurantOutput)
   @Role(["Owner"])
   async createRestaurant(
     @AuthUser() authUser: User,
     @Args("input") createRestaurantInput: CreateRestaurantInput,
-  ): Promise<CreateAccountOutput> {
+  ): Promise<CreateRestaurantOutput> {
     return this.restaurantService.createRestaurant(
       authUser,
       createRestaurantInput,
