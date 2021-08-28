@@ -27,9 +27,9 @@ import { UploadsModule } from "./uploads/uploads.module"
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === "dev" ? ".env.dev" : ".env.test",
-      ignoreEnvFile: process.env.NODE_ENV === "prod",
+      ignoreEnvFile: process.env.NODE_ENV === "production",
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid("dev", "prod", "test"),
+        NODE_ENV: Joi.string().valid("dev", "production", "test"),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.string().required(),
         DB_USERNAME: Joi.string().required(),
@@ -67,6 +67,7 @@ import { UploadsModule } from "./uploads/uploads.module"
     }),
 
     GraphQLModule.forRoot({
+      playground: process.env.NODE_ENV !== "production",
       installSubscriptionHandlers: true,
       autoSchemaFile: true,
       // http 링크에는 req가 있고 websoket에는 connection 이 있다.
