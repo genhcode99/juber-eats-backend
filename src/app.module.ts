@@ -20,7 +20,7 @@ import { Category } from "./restaurants/entities/cetegory.entity"
 import { Verification } from "./users/entities/verification.entity"
 import { RestaurantsModule } from "./restaurants/restaurants.module"
 import { Restaurant } from "./restaurants/entities/restaurant.entity"
-import { UploadsModule } from './uploads/uploads.module';
+import { UploadsModule } from "./uploads/uploads.module"
 
 @Module({
   imports: [
